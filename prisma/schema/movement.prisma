@@ -1,0 +1,26 @@
+enum MovementType {
+  RECEIPT // Inbound stock in
+  SHIPMENT // Outbound stock out
+  TRANSFER // Location to location transfer
+  ADJUSTMENT // Stock correction (damage, loss, etc.)
+}
+
+model InventoryMovement {
+  id             String       @id @default(uuid())
+  type           MovementType
+  productId      String
+  lotId          String?
+  quantity       Int // Positive for additions, negative/positive depending on transaction
+  fromLocationId String?
+  toLocationId   String?
+  reason         String? // Explanation for transfers/adjustments
+  authorizedById String
+  createdAt      DateTime     @default(now())
+
+  // Relations
+  product      Product       @relation(fields: [productId], references: [id])
+  lot          InventoryLot? @relation(fields: [lotId], references: [id])
+  fromLocation Location?     @relation("SourceLocation", fields: [fromLocationId], references: [id])
+  toLocation   Location?     @relation("DestLocation", fields: [toLocationId], references: [id])
+  authorizedBy User          @relation(fields: [authorizedById], references: [id])
+}

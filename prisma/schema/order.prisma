@@ -1,0 +1,99 @@
+enum InboundStatus {
+  PENDING
+  RECEIVING
+  COMPLETED
+  CANCELLED
+}
+
+enum OutboundStatus {
+  PENDING
+  PICKING
+  SHIPPED
+  CANCELLED
+}
+
+model Supplier {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  contact   String?
+  email     String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inboundOrders InboundOrder[]
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  contact   String?
+  email     String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  outboundOrders OutboundOrder[]
+}
+
+model InboundOrder {
+  id          String        @id @default(uuid())
+  orderNumber String        @unique // PO-XXXXXX
+  supplierId  String
+  status      InboundStatus @default(PENDING)
+  creatorId   String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  supplier Supplier           @relation(fields: [supplierId], references: [id])
+  creator  User               @relation("InboundCreator", fields: [creatorId], references: [id])
+  items    InboundOrderItem[]
+}
+
+model InboundOrderItem {
+  id             String   @id @default(uuid())
+  inboundOrderId String
+  productId      String
+  qtyExpected    Int // Quantity ordered
+  qtyReceived    Int      @default(0) // Quantity actually received
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  inboundOrder InboundOrder @relation(fields: [inboundOrderId], references: [id], onDelete: Cascade)
+  product      Product      @relation(fields: [productId], references: [id])
+}
+
+model OutboundOrder {
+  id          String         @id @default(uuid())
+  orderNumber String         @unique // SO-XXXXXX
+  customerId  String
+  status      OutboundStatus @default(PENDING)
+  creatorId   String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relations
+  customer Customer            @relation(fields: [customerId], references: [id])
+  creator  User                @relation("OutboundCreator", fields: [creatorId], references: [id])
+  items    OutboundOrderItem[]
+}
+
+model OutboundOrderItem {
+  id              String        @id @default(uuid())
+  outboundOrderId String
+  productId       String
+  qtyRequested    Int // Quantity requested
+  qtyShipped      Int           @default(0) // Quantity shipped
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  outboundOrder OutboundOrder @relation(fields: [outboundOrderId], references: [id], onDelete: Cascade)
+  product       Product       @relation(fields: [productId], references: [id])
+}

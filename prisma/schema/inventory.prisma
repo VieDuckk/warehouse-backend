@@ -1,0 +1,31 @@
+model Inventory {
+  id         String   @id @default(uuid())
+  productId  String
+  locationId String
+  quantity   Int      @default(0) // Physical quantity at this location
+  lotId      String? // Optional relation to track specific batches
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  product  Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  location Location      @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  lot      InventoryLot? @relation(fields: [lotId], references: [id], onDelete: SetNull)
+
+  @@unique([productId, locationId, lotId])
+}
+
+model InventoryLot {
+  id              String    @id @default(uuid())
+  lotNumber       String    @unique // Batch or lot identification number
+  productId       String
+  expirationDate  DateTime?
+  manufactureDate DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  product     Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventories Inventory[]
+  movements   InventoryMovement[]
+}

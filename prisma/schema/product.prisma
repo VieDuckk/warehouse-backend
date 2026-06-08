@@ -1,0 +1,32 @@
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  products Product[]
+}
+
+model Product {
+  id          String    @id @default(uuid())
+  sku         String    @unique // Stock Keeping Unit
+  barcode     String?   @unique
+  name        String
+  description String?
+  price       Float     @default(0)
+  weight      Float? // In kg
+  volume      Float? // In cubic meters
+  categoryId  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  category      Category?           @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  inventories   Inventory[]
+  lots          InventoryLot[]
+  inboundItems  InboundOrderItem[]
+  outboundItems OutboundOrderItem[]
+  movementItems InventoryMovement[]
+}

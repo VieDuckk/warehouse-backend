@@ -1,0 +1,20 @@
+enum Role {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  fullName  String
+  role      Role     @default(STAFF)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Auditing relations
+  inboundOrdersCreated  InboundOrder[]  @relation("InboundCreator")
+  outboundOrdersCreated OutboundOrder[] @relation("OutboundCreator")
+  movementsAuthorized   InventoryMovement[]
+}
